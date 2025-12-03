@@ -15,10 +15,12 @@ export const HandleRequest = (req, res) => {
     getOneItem(req,res)
     return;
   }
-  else if (route === "/addnewitem" && req.method === "POST"){
+  else if (route === "/additem" && req.method === "POST"){
+    
     addItem(req,res)
+    return;
   }
-  else if (route === "/updateitem" && req.method === "PATCH"){
+  else if (route === "/updateitem" && req.method === "PUT"){
     updateItem(req,res)
     return
   }
@@ -26,7 +28,7 @@ export const HandleRequest = (req, res) => {
     deleteItem(req,res)
     return;
   }
-  
+
   res.writeHead(404, { "Content-Type": "application/json" });
   res.end("invalid route");
 };
