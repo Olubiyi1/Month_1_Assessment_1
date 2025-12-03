@@ -1,0 +1,62 @@
+[
+  {
+    "Id": 1,
+    "Name": "T-shirt",
+    "Price": 1500,
+    "Size": "M"
+  },
+  {
+    "Id": 2,
+    "Name": "Jeans",
+    "Price": 3000,
+    "Size": "L"
+  },
+  {
+    "Id": 3,
+    "Name": "Jacket",
+    "Price": 5000,
+    "Size": "S"
+  },
+  {
+    "Id": 4,
+    "Name": "Sneakers",
+    "Price": 7000,
+    "Size": "M"
+  },
+  {
+    "Id": 5,
+    "Name": "Cap",
+    "Price": 800,
+    "Size": "S"
+  },
+  {
+    "Id": 6,
+    "Name": "Hoodie",
+    "Price": 4000,
+    "Size": "L"
+  },
+  {
+    "Id": 7,
+    "Name": "Shorts",
+    "Price": 1200,
+    "Size": "M"
+  },
+  {
+    "Id": 8,
+    "Name": "Socks",
+    "Price": 500,
+    "Size": "S"
+  },
+  {
+    "Id": 9,
+    "Name": "Belt",
+    "Price": 1000,
+    "Size": "L"
+  },
+  {
+    "Id": 10,
+    "Name": "Shirt",
+    "Price": 2500,
+    "Size": "M"
+  }
+]
