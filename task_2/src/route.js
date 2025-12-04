@@ -1,4 +1,10 @@
-import { getAllItems,getOneItem ,addItem, updateItem, deleteItem} from "./services.js";
+import {
+  getAllItems,
+  getOneItem,
+  addItem,
+  updateItem,
+  deleteItem,
+} from "./services.js";
 
 export const HandleRequest = (req, res) => {
   const route = req.url.toLowerCase();
@@ -10,22 +16,17 @@ export const HandleRequest = (req, res) => {
   } else if (route === "/getallitems" && req.method === "GET") {
     getAllItems(req, res);
     return;
-  }
-  else if (route === "/getsingleitem" && req.method === "GET"){
-    getOneItem(req,res)
+  } else if (req.method === "GET" && req.url.startsWith("/getitem/")) {
+    getOneItem(req, res);
     return;
-  }
-  else if (route === "/additem" && req.method === "POST"){
-    
-    addItem(req,res)
+  } else if (route === "/additem" && req.method === "POST") {
+    addItem(req, res);
     return;
-  }
-  else if (route === "/updateitem" && req.method === "PUT"){
-    updateItem(req,res)
-    return
-  }
-  else if (route === "/deleteitem" && req.method === "DELETE"){
-    deleteItem(req,res)
+  } else if (route === "/updateitem" && req.method === "PUT") {
+    updateItem(req, res);
+    return;
+  } else if (route === "/deleteitem" && req.method === "DELETE") {
+    deleteItem(req, res);
     return;
   }
 

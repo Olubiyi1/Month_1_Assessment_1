@@ -7,11 +7,9 @@ const _filename = fileURLToPath(import.meta.url);
 const _dirname = path.dirname(_filename);
 const filePath = path.join(_dirname, "data", "item.json");
 
-
 // to get all items
 export const getAllItems = (req, res) => {
   fs.readFile(filePath, "utf8", (err, items) => {
-
     if (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       return res.end("failed to read file");
@@ -22,69 +20,160 @@ export const getAllItems = (req, res) => {
 };
 
 // to get a single item
-// to get a single item
 export const getOneItem = (req, res) => {
-  const id = req.params.id;
-  
-  fs.readFile(filePath, "utf8", (err, data) => {
+
+  const parts = req.url.split("/");  
+  const id = parts[2];  
+
+  fs.readFile(filePath, "utf8", (err, items) => {
     if (err) {
       res.writeHead(500, { "Content-Type": "application/json" });
       return res.end("failed to read file");
     }
-    
-    // converting the JSON file to js object
-    const items = JSON.parse(data);
-    const item = items.find((i) => i.id.toString() === id.toString());
-    
-    if (!item) {
+
+    const itemsObj = JSON.parse(items);
+
+    const foundItem = itemsObj.find(
+      (item) => Number(item.id) === Number(id)
+    );
+
+    if (!foundItem) {
       res.writeHead(404, { "Content-Type": "application/json" });
-      return res.end("item not found");
+      return res.end("Item with the specified id doesn't exist");
     }
-    
+
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(item));
+    res.end(JSON.stringify(foundItem));
   });
 };
 
-// to create item
+// to create an item
 export const addItem = (req, res) => {
-  const body = []
-  req.on("end",(chunk)=>{
-    body.push(chunk)
+  const body = [];
+  req.on("data", (chunk) => {
+    body.push(chunk);
   });
-  req.on("end",()=>{
-    // parsedItem here is a string
-    const parsedItem = Buffer.concat(body).toString()
+  req.on("end", () => {
+    const parsedItem = Buffer.concat(body).toString();
+    const newItem = JSON.parse(parsedItem);
 
-    // to be converted to a js object for easy manipulation
-    const newItem = JSON.parse(parsedItem)
+    // adding new item to the end of the items array
+    fs.readFile(filePath, "utf8", (err, data) => {
 
-    // file must be read before adding a new item
-    fs.readFile(filePath,"utf8",(err,item)=>{
-      if(err){
-        res.writeHead(500,{"Content-Type":"application/json"})
-        return res.end("error reading file")
+      if (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end("failed to read file");
       }
-      // item is also in string and needed t be converted to jsobject
-      const oldItem = JSON.parse(item);
-      const allItems = [...oldItem,newItem]
 
-      // fs only deals woth string and not array or object and allItem is an array
-      fs.writeFile(filePath,JSON.stringify(allItems),(err)=>{
-        if(err){
-          res.writeHead(400,{"Content-Type":"application/json"})
-          return res.end("Internal error, couldn't save file")
+      const oldItems = JSON.parse(data);
+      const allItems = [...oldItems, newItem];
+
+      // writing the new item
+      fs.writeFile(filePath, JSON.stringify(allItems), (err) => {
+
+        if (err) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end("failed to add new item");
         }
-        res.writeHead(200,{"Content-Type":"application/json"})
-        return res.end(JSON.stringify(newItem))
-      })
-    })
-  })
 
+        res.writeHead(200,{"Content-Type":"application/json"})
+        res.end(JSON.stringify(newItem));
+      });
+    });
+  });
 };
 
-// to update item
-export const updateItem = (req, res) => {};
+// to update an item
+export const updateItem = (req, res) => {
+  const body = [];
+  req.on("data", (chunk) => {
+    body.push(chunk);
+  });
 
-// to delete item
-export const deleteItem = (req, res) => {};
+  req.on("end", () => {
+    const parsedItem = Buffer.concat(body).toString();
+    const itemToUpdate = JSON.parse(parsedItem);
+    const itemId = itemToUpdate.id
+
+    fs.readFile(filePath, "utf8", (err, items) => {
+
+      if (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end("failed to read file");
+      }
+
+      const itemsObj = JSON.parse(items)
+      const itemIndex = itemsObj.findIndex((item) => {return Number(item.id) === Number(itemId)})
+   
+      if(itemIndex === -1){
+        res.writeHead(404,{"Content-Type": "application/json"})
+        return res.end("Item with the specified id doesn't exist")
+      }
+      
+      const updatedItem = {...itemsObj[itemIndex],...itemToUpdate}
+      itemsObj[itemIndex] = updatedItem 
+      // console.log(updatedItem);
+
+       fs.writeFile(filePath, JSON.stringify(itemsObj), (err) => {
+
+        if (err) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end("failed to update item");
+        }
+
+        res.writeHead(200,{"Content-Type":"application/json"})
+        res.end("Update Successful");
+      })
+       
+      
+    });
+  });
+};
+
+// to delete an item
+export const deleteItem = (req, res) => {
+  const body = [];
+  req.on("data", (chunk) => {
+    body.push(chunk);
+  });
+
+  req.on("end", () => {
+    const parsedItem = Buffer.concat(body).toString();
+    const itemToDelete = JSON.parse(parsedItem);
+    const itemId = itemToDelete.id;
+
+    fs.readFile(filePath, "utf8", (err, items) => {
+      if (err) {
+        res.writeHead(500, { "Content-Type": "application/json" });
+        return res.end("failed to read file");
+      }
+
+      const itemsObj = JSON.parse(items);
+
+      // find the index of the item to delete
+      const itemIndex = itemsObj.findIndex(
+        (item) => Number(item.id) === Number(itemId)
+      );
+
+      if (itemIndex === -1) {
+        res.writeHead(404, { "Content-Type": "application/json" });
+        return res.end("Item with the specified id doesn't exist");
+      }
+
+      // remove the item
+      itemsObj.splice(itemIndex, 1);
+
+      // delete the file
+      fs.writeFile(filePath, JSON.stringify(itemsObj), (err) => {
+        if (err) {
+          res.writeHead(500, { "Content-Type": "application/json" });
+          return res.end("failed to delete item");
+        }
+
+        res.writeHead(200, { "Content-Type": "application/json" });
+        res.end("Delete Successful");
+      });
+    });
+  });
+};
+
